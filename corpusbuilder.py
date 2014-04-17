@@ -30,4 +30,7 @@ if __name__ == '__main__':
         help="output directory for parsed corpus")
     args = parser.parse_args()
 
+    if not os.path.isdir(args.output):
+        os.makedirs(args.output)
+
     build_corpus(args.entries, args.output)
