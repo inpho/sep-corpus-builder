@@ -1,13 +1,17 @@
 import os
 import os.path
+import logging
 import sys
 from codecs import open
+from BeautifulSoup import BeautifulSoup
 
 def process_archives():
     for root,dirs,files in os.walk("/Users/sep/SEPMirror/usr/encyclopedia/archives/"):
-        path = root+"/entries.txt"
-        sem_year = root.split('/')[7]
-        build_corpus(path ,"/some folder path",sem_year);
+        for sem_year in dirs:
+            path = root+sem_year+"/entries.txt"
+            print path
+            print "PROCESSING", sem_year
+            build_corpus(path ,"data/" +sem_year+"/",sem_year);
 
 def extract_article_body(filename):
     """
@@ -40,19 +44,19 @@ def extract_article_body(filename):
     else:
         logging.error('Could not extract text from %s' % filename)
 
-        return '':
+        return ''
 
 
 def build_corpus(entriesfile, output_dir,sem_year):
     # check if output_dir exists, if not make it
     if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+        os.makedirs(output_dir)
 
     with open(entriesfile, 'rb') as csvfile:
         for row in csvfile:
             sep_dir = row.split("::")[0]
-            filename="/Users/sep/SEPMirror/usr/etc/httpd/htdocs/archives/"+sem-year+"/entries/"+sep_dir+"/index.html"
-            if not filename:
+            filename="/Users/sep/SEPMirror/usr/etc/httpd/htdocs/archives/"+sem_year+"/entries/"+sep_dir+"/index.html"
+            if not os.path.exists(filename):
                 print "NO FILE FOR", sep_dir
                 continue
             plain_filename = os.path.join(output_dir, '%s.txt' % sep_dir)
@@ -60,6 +64,7 @@ def build_corpus(entriesfile, output_dir,sem_year):
                 plainfile.write(extract_article_body(filename))
 
 if __name__ == '__main__':
+    """
     from argparse import ArgumentParser
     parser = ArgumentParser(description="Script to build a corpus from SEP id list")
     parser.add_argument("entries",
@@ -69,3 +74,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     build_corpus(args.entries, args.output)
+    """
+    process_archives()
