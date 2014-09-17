@@ -3,6 +3,11 @@ import os.path
 import sys
 from codecs import open
 
+def process_archives():
+    for root,dirs,files in os.walk("/Users/sep/SEPMirror/usr/encyclopedia/archives/"):
+        path = root+"/entries.txt"
+        sem_year = root.split('/')[7]
+        build_corpus(path ,"/some folder path",sem_year);
 
 def extract_article_body(filename):
     """
@@ -38,7 +43,7 @@ def extract_article_body(filename):
         return '':
 
 
-def build_corpus(entriesfile, output_dir):
+def build_corpus(entriesfile, output_dir,sem_year):
     # check if output_dir exists, if not make it
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
@@ -46,13 +51,13 @@ def build_corpus(entriesfile, output_dir):
     with open(entriesfile, 'rb') as csvfile:
         for row in csvfile:
             sep_dir = row.split("::")[0]
-            filename = sep.article_path(sep_dir)
+            filename="/Users/sep/SEPMirror/usr/etc/httpd/htdocs/archives/"+sem-year+"/entries/"+sep_dir+"/index.html"
             if not filename:
                 print "NO FILE FOR", sep_dir
                 continue
             plain_filename = os.path.join(output_dir, '%s.txt' % sep_dir)
             with open(plain_filename, 'wb', 'utf-8') as plainfile:
-                plainfile.write(sep.extract_article_body(filename))
+                plainfile.write(extract_article_body(filename))
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
