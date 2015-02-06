@@ -46,7 +46,20 @@ def extract_article_body(filename):
 
         return ''
 
+def extract_bibliography(filename):
+	f = open(filename)
+        doc = f.read()
+        soup = BeautifulSoup(doc, convertEntities=["xml", "html"])
+        bibliography = soup.findAll('ul',{"class":"hanging"})
+        bib =[]
+        if bibliography:
+                for ul in bibliography:
+                        for li in ul.findAll('li'):
+                                bib.append(li.text)
+        else:
+                print "No bibliography found"
 
+        return bib
 def build_corpus(entriesfile, output_dir,sem_year):
     # check if output_dir exists, if not make it
     if not os.path.exists(output_dir):
