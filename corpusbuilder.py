@@ -4,7 +4,19 @@ import logging
 import sys
 from codecs import open
 from BeautifulSoup import BeautifulSoup
-
+import HTMLParser
+import rython
+def getStyleBibliography(biblioList):
+	ctx = rython.RubyContext(requires=["rubygems", "anystyle/parser"])
+        ctx("Encoding.default_internal = 'UTF-8'")
+        ctx("Encoding.default_external = 'UTF-8'")
+        anystyle = ctx("Anystyle.parser")
+        anyStyleList = []
+	h =  HTMLParser.HTMLParser()
+        for biblio in biblioList:
+                parsed = anystyle.parse((h.unescape(biblio).encode('utf-8'))
+                anyStyleList.append(parsed)
+        return anyStyleList	
 def process_archives():
     for root,dirs,files in os.walk("/Users/sep/SEPMirror/usr/encyclopedia/archives/"):
         for sem_year in dirs:
