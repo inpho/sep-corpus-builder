@@ -6,8 +6,6 @@ from codecs import open
 from BeautifulSoup import BeautifulSoup
 import HTMLParser
 import rython
-import re
-
 def getStyleBibliography(biblioList):
 	ctx = rython.RubyContext(requires=["rubygems", "anystyle/parser"])
         ctx("Encoding.default_internal = 'UTF-8'")
@@ -16,18 +14,16 @@ def getStyleBibliography(biblioList):
         anyStyleList = []
 	h =  HTMLParser.HTMLParser()
         for biblio in biblioList:
-                parsed = anystyle.parse((h.unescape(biblio).encode('utf-8')))
+                parsed = anystyle.parse((h.unescape(biblio).encode('utf-8'))
                 anyStyleList.append(parsed)
         return anyStyleList	
 def process_archives():
-    for root,dirs,files in os.walk("/var/inphosemantics/sep-archives/db/"):
+    for root,dirs,files in os.walk("/Users/sep/SEPMirror/usr/encyclopedia/archives/"):
         for sem_year in dirs:
-            year = sem_year[-4:]
-            if int(year) > 2006:
-                path = root+sem_year+"/entries.txt"
-                print path
-                print "PROCESSING", sem_year
-                build_corpus(path ,"data/" + sem_year + "/", sem_year);
+            path = root+sem_year+"/entries.txt"
+            print path
+            print "PROCESSING", sem_year
+            build_corpus(path ,"data/" +sem_year+"/",sem_year);
 
 def extract_article_body(filename):
     """
@@ -73,24 +69,21 @@ def extract_bibliography(filename):
                         for li in ul.findAll('li'):
                                 bib.append(li.text)
         else:
-            print "No bibliography found"
+                print "No bibliography found"
 
         return bib
 def build_corpus(entriesfile, output_dir,sem_year):
     # check if output_dir exists, if not make it
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    count = 0
+
     with open(entriesfile, 'rb') as csvfile:
         for row in csvfile:
             sep_dir = row.split("::")[0]
-            filename="/var/inphosemantics/sep-archives/raw/"+sem_year+"/entries/"+sep_dir+"/index.html"
+            filename="/Users/sep/SEPMirror/usr/etc/httpd/htdocs/archives/"+sem_year+"/entries/"+sep_dir+"/index.html"
             if not os.path.exists(filename):
                 print "NO FILE FOR", sep_dir
                 continue
-            else:
-                count = count + 1
-                print "SUCCESS " + str(count)
             plain_filename = os.path.join(output_dir, '%s.txt' % sep_dir)
             with open(plain_filename, 'wb', 'utf-8') as plainfile:
                 plainfile.write(extract_article_body(filename))
