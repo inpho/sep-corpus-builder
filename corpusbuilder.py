@@ -7,18 +7,71 @@ from BeautifulSoup import BeautifulSoup
 import HTMLParser
 import rython
 import re
+from datetime import datetime
+from collections import defaultdict
+
+def get_season(timestamp):
+    date = datetime.fromtimestamp(timestamp)
+
+    if (date.month >= 3 and date.day >= 20 and
+        date.month < 6 and date.day < 21):
+        season = "sum"
+    elif (date.month >= 6 and date.day >= 20 and
+        date.month < 9 and date.day < 21):
+        season = "fall"
+    elif (date.month >= 9 and date.date >= 20 and
+        date.month < 12 and date.day < 21):
+        season = "win"
+    else:
+        season = "spr"
+
+    return season + date.year
+        
+def build_archive_corpus(codes=None):
+    """
+    Takes the log file for each entry and finds the corresponding archive for
+    each published version or revised version. Each version is then copied into
+    a single directory containing all unique versions of all articles for future 
+    topic modeling.
+
+    Returns a dictionary with keys of entry names and values of a list of 
+    filenames corresponding to the unique articles.
+    """
+    # set default codes
+    if codes is None:
+        codes = ["eP101", "ep101", "eR101"]
+    # set log path and iterate over logs, each file is a entry
+    path = "/home/sep/SEPMirror/SEPMirror/usr/encyclopedia/logs"
+    archive_path = '/var/inphosemantics/sep-archives/raw/{season}/entries/{entry}/'
+    results = defaultdict(list)
+    for entry in os.listdir(path):
+        # archives stores unique versions
+        versions = set()
+        with open(path+'/'+entry, 'r') as f:
+            for line_num, line in enumerate(f):
+                line_data = line.split("::")
+                try:
+                    if(line_data[2] in codes):
+                        timestamp = float(line_data[1])
+                        versions.add(get_season(timestamp))
+                except IndexError:
+                    logging.info("Index error on line: %s", line_num)
+        for season in versions:
+            results[entry].append(archive_path.format(season=season,
+            entry=entry))
+    return results
 
 def getStyleBibliography(biblioList):
-	ctx = rython.RubyContext(requires=["rubygems", "anystyle/parser"])
-        ctx("Encoding.default_internal = 'UTF-8'")
-        ctx("Encoding.default_external = 'UTF-8'")
-        anystyle = ctx("Anystyle.parser")
-        anyStyleList = []
-	h =  HTMLParser.HTMLParser()
-        for biblio in biblioList:
-                parsed = anystyle.parse((h.unescape(biblio).encode('utf-8')))
-                anyStyleList.append(parsed)
-        return anyStyleList	
+    ctx = rython.RubyContext(requires=["rubygems", "anystyle/parser"])
+    ctx("Encoding.default_internal = 'UTF-8'")
+    ctx("Encoding.default_external = 'UTF-8'")
+    anystyle = ctx("Anystyle.parser")
+    anyStyleList = []
+    h =  HTMLParser.HTMLParser()
+    for biblio in biblioList:
+        parsed = anystyle.parse((h.unescape(biblio).encode('utf-8')))
+        anyStyleList.append(parsed)
+    return anyStyleList	
 
 def process_archives():
     for root,dirs,files in os.walk("/var/inphosemantics/sep-archives/db/"):
