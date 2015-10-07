@@ -25,7 +25,23 @@ def get_season(timestamp):
     else:
         season = "spr"
 
-    return season + date.year
+    return season + str(date.year)
+
+def create_data_entries(unique_articles, output_dir = "/data"):
+    #TODO: check if output_dir exists, if not make it
+    
+    for entry, season_path in unique_articles.iteritems():
+        for season, path in season_path.iteritems():
+            output_path = os.getcwd() + output_dir + '/' + season + '-' + entry + '.txt'
+            
+            # check if the index file that corresponds to the article name exists
+            filename = path + 'index.html'
+            if not os.path.exists(filename):
+                logging.warning('No file for %s', entry)
+                continue
+            with open(output_path, 'a+', 'utf-8') as plainfile:
+                plainfile.write(extract_article_body(path + 'index.html'))
+  
         
 def build_archive_corpus(codes=None):
     """
@@ -40,12 +56,14 @@ def build_archive_corpus(codes=None):
     # set default codes
     if codes is None:
         codes = ["eP101", "ep101", "eR101"]
+        
     # set log path and iterate over logs, each file is a entry
     path = "/home/sep/SEPMirror/SEPMirror/usr/encyclopedia/logs"
+    path = "/var/inphosemantics/sep-archives/logs"
     archive_path = '/var/inphosemantics/sep-archives/raw/{season}/entries/{entry}/'
-    results = defaultdict(list)
+    results = defaultdict(dict)
     for entry in os.listdir(path):
-        # archives stores unique versions
+       # archives stores unique versions
         versions = set()
         with open(path+'/'+entry, 'r') as f:
             for line_num, line in enumerate(f):
@@ -57,8 +75,13 @@ def build_archive_corpus(codes=None):
                 except IndexError:
                     logging.info("Index error on line: %s", line_num)
         for season in versions:
-            results[entry].append(archive_path.format(season=season,
-            entry=entry))
+            #dictionary: key - season, value - path
+            #season_path[season] = archive_path.format(season=season,
+            #entry=entry)
+            results[entry][season] = archive_path.format(season=season,
+            entry=entry)
+            #results[entry].append(archive_path.format(season=season,
+            #entry=entry))
     return results
 
 def getStyleBibliography(biblioList):
@@ -72,48 +95,6 @@ def getStyleBibliography(biblioList):
         parsed = anystyle.parse((h.unescape(biblio).encode('utf-8')))
         anyStyleList.append(parsed)
     return anyStyleList	
-
-def process_archives():
-    for root,dirs,files in os.walk("/var/inphosemantics/sep-archives/db/"):
-        for sem_year in dirs:
-            year = sem_year[-4:]
-            if int(year) > 2006:
-                path = root+sem_year+"/entries.txt"
-                logging.info("Current path: %s", path) 
-                build_corpus(path ,"data/" + sem_year + "/", sem_year);
-
-def extract_article_body(filename):
-    """
-    Extracts the article body from the SEP article at the given filename. Some
-    error handling is done to guarantee that this function returns at least the
-    empty string. Check the error log.
-    """
-    f = open(filename)
-    doc = f.read()
-    soup = BeautifulSoup(doc, convertEntities=["xml", "html"])
-
-    # rip out bibliography
-    biblio_root = soup.findAll('h2', text='Bibliography')
-    if biblio_root:
-        biblio_root = biblio_root[-1].findParent('h2')
-        if biblio_root:
-            biblio = [biblio_root]
-            biblio.extend(biblio_root.findNextSiblings())
-            biblio = [elm.extract() for elm in biblio]
-        else:
-            logging.error('Could not extract bibliography from %s' % filename)
-
-    # grab modified body 
-    body = soup.find("div", id="aueditable")
-    if body is not None:
-        # remove HTML escaped characters
-        body = re.sub("&\w+;", "", body.text)
-    
-        return body
-    else:
-        logging.error('Could not extract text from %s' % filename)
-
-        return ''
 
 def extract_bibliography(filename):
 	f = open(filename)
@@ -130,25 +111,49 @@ def extract_bibliography(filename):
 
         return bib
 
-def build_corpus(entriesfile, output_dir,sem_year):
-    # check if output_dir exists, if not make it
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    # keep of tally of the successful reads
-    success_read = 0
-    with open(entriesfile, 'rb') as csvfile:
-        for row in csvfile:
-            sep_dir = row.split("::")[0]
-            filename="/var/inphosemantics/sep-archives/raw/"+sem_year+"/entries/"+sep_dir+"/index.html"
-            if not os.path.exists(filename):
-                logging.warning('No file for %s', sep_dir)
-                continue
-            else:
-                success_read = success_read + 1
-            plain_filename = os.path.join(output_dir, '%s.txt' % sep_dir)
-            with open(plain_filename, 'wb', 'utf-8') as plainfile:
-                plainfile.write(extract_article_body(filename))
-        logging.info("Successful reads: %d", success_read)
+def extract_article_body(filename):
+    """
+    Extracts the article body from the SEP article at the given filename. Some
+    error handling is done to guarantee that this function returns at least the
+    empty string. Check the error log.
+    """
+    try:
+      f = open(filename)
+      doc = f.read()
+      soup = BeautifulSoup(doc, convertEntities=["xml", "html"])
+
+      # rip out bibliography
+      biblio_root = soup.findAll('h2', text='Bibliography')
+      if biblio_root:
+          biblio_root = biblio_root[-1].findParent('h2')
+          if biblio_root:
+              biblio = [biblio_root]
+              biblio.extend(biblio_root.findNextSiblings())
+              biblio = [elm.extract() for elm in biblio]
+          else:
+              logging.error('Could not extract bibliography from %s' % filename)
+
+      # grab modified body 
+      body = soup.find("div", id="aueditable")
+      if body is not None:
+          # remove HTML escaped characters
+          body = re.sub("&\w+;", "", body.text)
+          return body
+      else:
+          logging.error('Could not extract text from %s' % filename)
+          return ''
+    except:
+      logging.error('File at path %s does not exist.' % filename)
+      return ''
+    
+def process_archives():
+    for root,dirs,files in os.walk("/var/inphosemantics/sep-archives/db/"):
+        for sem_year in dirs:
+            year = sem_year[-4:]
+            if int(year) > 2006:
+                path = root+sem_year+"/entries.txt"
+                logging.info("Current path: %s", path) 
+                build_corpus(path ,"data/" + sem_year + "/", sem_year)
 
 if __name__ == '__main__':
     """
@@ -163,4 +168,4 @@ if __name__ == '__main__':
     build_corpus(args.entries, args.output)
     """
     logging.basicConfig(format='%(levelname)s:%(message)s', filename='sep_corpus.log', level = logging.INFO)
-    process_archives()
+    create_data_entries(build_archive_corpus())
