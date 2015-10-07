@@ -28,6 +28,13 @@ def get_season(timestamp):
     return season + str(date.year)
 
 def create_data_entries(unique_articles, output_dir = "/data"):
+    """
+    Takes a nested dictionary that contains the information about the unique articles and 
+    writes out each article body to a file of format '{season}-{entry}.txt'. For example, 
+    'spr2012-epistemology.txt'
+    
+    See build_archive_corpus for information about the format of the nested dictionary.
+    """
     #TODO: check if output_dir exists, if not make it
     
     for entry, season_path in unique_articles.iteritems():
@@ -39,10 +46,10 @@ def create_data_entries(unique_articles, output_dir = "/data"):
             if not os.path.exists(filename):
                 logging.warning('No file for %s', entry)
                 continue
+            # writes out each article body to a file
             with open(output_path, 'a+', 'utf-8') as plainfile:
                 plainfile.write(extract_article_body(path + 'index.html'))
   
-        
 def build_archive_corpus(codes=None):
     """
     Takes the log file for each entry and finds the corresponding archive for
@@ -50,18 +57,20 @@ def build_archive_corpus(codes=None):
     a single directory containing all unique versions of all articles for future 
     topic modeling.
 
-    Returns a dictionary with keys of entry names and values of a list of 
-    filenames corresponding to the unique articles.
+    Returns the information about the unique articles via a dictionary:
+      key: entry name
+      value: dictionary:
+        key': season
+        value': filename corresponding to the unique article
     """
     # set default codes
     if codes is None:
         codes = ["eP101", "ep101", "eR101"]
         
     # set log path and iterate over logs, each file is a entry
-    path = "/home/sep/SEPMirror/SEPMirror/usr/encyclopedia/logs"
     path = "/var/inphosemantics/sep-archives/logs"
     archive_path = '/var/inphosemantics/sep-archives/raw/{season}/entries/{entry}/'
-    results = defaultdict(dict)
+    unique_articles = defaultdict(dict)
     for entry in os.listdir(path):
        # archives stores unique versions
         versions = set()
@@ -75,14 +84,9 @@ def build_archive_corpus(codes=None):
                 except IndexError:
                     logging.info("Index error on line: %s", line_num)
         for season in versions:
-            #dictionary: key - season, value - path
-            #season_path[season] = archive_path.format(season=season,
-            #entry=entry)
-            results[entry][season] = archive_path.format(season=season,
+            unique_articles[entry][season] = archive_path.format(season=season,
             entry=entry)
-            #results[entry].append(archive_path.format(season=season,
-            #entry=entry))
-    return results
+    return unique_articles
 
 def getStyleBibliography(biblioList):
     ctx = rython.RubyContext(requires=["rubygems", "anystyle/parser"])
@@ -167,5 +171,5 @@ if __name__ == '__main__':
 
     build_corpus(args.entries, args.output)
     """
-    logging.basicConfig(format='%(levelname)s:%(message)s', filename='sep_corpus.log', level = logging.INFO)
+    logging.basicConfig(format='%(levelname)s:%(message)s', filename='sep_corpus.log', level = logging.WARNING)
     create_data_entries(build_archive_corpus())
