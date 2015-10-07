@@ -44,7 +44,7 @@ def create_data_entries(unique_articles, output_dir = "/data"):
             # check if the index file that corresponds to the article name exists
             filename = path + 'index.html'
             if not os.path.exists(filename):
-                logging.warning('No file for %s', entry)
+                logging.warning('No file for %s during %s', entry, season)
                 continue
             # writes out each article body to a file
             with open(output_path, 'a+', 'utf-8') as plainfile:
@@ -144,6 +144,7 @@ def extract_article_body(filename):
           body = re.sub("&\w+;", "", body.text)
           return body
       else:
+          #TODO: Extract the body using beautiful soup for archives before 2005
           logging.error('Could not extract text from %s' % filename)
           return ''
     except:
