@@ -65,7 +65,7 @@ def build_archive_corpus(codes=None):
     """
     # set default codes
     if codes is None:
-        codes = ["eP101", "ep101", "eR101"]
+        codes = ["eP100", "eP101", "ep101", "eR101"]
         
     # set log path and iterate over logs, each file is a entry
     path = "/var/inphosemantics/sep-archives/logs"
