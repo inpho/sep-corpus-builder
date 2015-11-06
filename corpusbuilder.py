@@ -48,7 +48,7 @@ def create_data_entries(unique_articles, output_dir = "/data"):
                 continue
             # writes out each article body to a file
             with open(output_path, 'a+', 'utf-8') as plainfile:
-                plainfile.write(extract_article_body(path + 'index.html'))
+                plainfile.write(extract_article_body(entry, path + 'index.html'))
   
 def build_archive_corpus(codes=None):
     """
@@ -115,7 +115,22 @@ def extract_bibliography(filename):
 
         return bib
 
-def extract_article_body(filename):
+def get_titles():
+    """
+    Returns a dictionary of { sep_dir : title } pairs.
+    """
+    entries = "/var/inphosemantics/sep-archives/db/win2014/entries.txt"
+    
+    titles = {}
+    with open(entries) as f:
+        for line in f:
+            sep_dir, title, rest = line.split('::', 2)
+            title = title.replace(r"\'", "'")
+            titles[sep_dir] = title
+
+    return titles
+
+def extract_article_body(entry, filename):
     """
     Extracts the article body from the SEP article at the given filename. Some
     error handling is done to guarantee that this function returns at least the
@@ -137,28 +152,33 @@ def extract_article_body(filename):
           else:
               logging.error('Could not extract bibliography from %s' % filename)
 
-      # grab modified body 
+      # grab modified body
       body = soup.find("div", id="aueditable")
       if body is not None:
           # remove HTML escaped characters
           body = re.sub("&\w+;", "", body.text)
           return body
+      
+      #Extract differently formatted archives from before 2006 using Beautiful Soup
       else:
-          #TODO: Extract the body using beautiful soup for archives before 2005
+        #get titles from recent archive
+        titles = get_titles()
+        #use title to find the beginning of the article
+        finder = soup.find(re.compile('^h'), text=titles[entry])
+        #join together list of all the next 
+        new_body = ' '.join([tag.getText() for tag in finder.findAllNext()])
+
+        if new_body:
+          # remove HTML escaped characters 
+          new_body = re.sub("&\w+;", "", new_body)
+          return new_body
+        else:
           logging.error('Could not extract text from %s' % filename)
           return ''
     except:
       logging.error('File at path %s does not exist.' % filename)
       return ''
-    
-def process_archives():
-    for root,dirs,files in os.walk("/var/inphosemantics/sep-archives/db/"):
-        for sem_year in dirs:
-            year = sem_year[-4:]
-            if int(year) > 2006:
-                path = root+sem_year+"/entries.txt"
-                logging.info("Current path: %s", path) 
-                build_corpus(path ,"data/" + sem_year + "/", sem_year)
+
 
 if __name__ == '__main__':
     """
