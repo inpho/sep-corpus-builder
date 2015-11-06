@@ -156,7 +156,8 @@ def extract_article_body(entry, filename):
       body = soup.find("div", id="aueditable")
       if body is not None:
           # remove HTML escaped characters
-          body = re.sub("&\w+;", "", body.text)
+          body = re.sub("&\w+;", "", body.getText(' '))
+          body = re.sub("DO NOT MODIFY THIS LINE AND ABOVE", "", body)
           return body
       
       #Extract differently formatted archives from before 2006 using Beautiful Soup
@@ -166,7 +167,7 @@ def extract_article_body(entry, filename):
         #use title to find the beginning of the article
         finder = soup.find(re.compile('^h'), text=titles[entry])
         #join together list of all the next 
-        new_body = ' '.join([tag.getText() for tag in finder.findAllNext()])
+        new_body = ' '.join([tag.getText(' ') for tag in finder.findAllNext()])
 
         if new_body:
           # remove HTML escaped characters 
