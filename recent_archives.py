@@ -204,7 +204,7 @@ def generate_archive_dict():
        For example, 'introspection': ['spr2012', 'win2010', 'spr2010'].
      """
      entries = defaultdict(list)
-     files = [os.path.basename(x) for x in glob('/home/jessiepusateri/sep-corpus-builder/data/*.txt')]
+     files = [os.path.basename(x) for x in glob('data/*.txt')]
      for filename in files:
          season, article = filename.replace('.txt', '').split('-', 1)
          entries[article].append(season)
@@ -240,5 +240,5 @@ if __name__ == '__main__':
     for entry in versions:
         versions[entry] = sorted(versions[entry], key = archive_sort_function)
     #print versions
-    print archive_at_season('spr2000', versions)
+    print archive_at_season('spr2012', versions)
 

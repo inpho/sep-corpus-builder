@@ -68,8 +68,8 @@ def build_archive_corpus(codes=None):
         codes = ["eP100", "eP101", "ep101", "eR101"]
         
     # set log path and iterate over logs, each file is a entry
-    path = "/var/inphosemantics/sep-archives/logs"
-    archive_path = '/var/inphosemantics/sep-archives/raw/{season}/entries/{entry}/'
+    path = "/var/inphosemantics/SEPMirror/usr/encyclopedia/logs"
+    archive_path = '/var/inphosemantics/SEPMirror/private/etc/httpd/htdocs/archives/{season}/entries/{entry}/'
     unique_articles = defaultdict(dict)
     for entry in os.listdir(path):
        # archives stores unique versions
@@ -119,7 +119,7 @@ def get_titles():
     """
     Returns a dictionary of { sep_dir : title } pairs.
     """
-    entries = "/var/inphosemantics/sep-archives/db/win2014/entries.txt"
+    entries = "/var/inphosemantics/SEPMirror/usr/encyclopedia/databases/entries.txt"
     
     titles = {}
     with open(entries) as f:
