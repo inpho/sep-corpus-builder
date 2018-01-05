@@ -5,7 +5,6 @@ import sys
 from codecs import open
 from BeautifulSoup import BeautifulSoup
 import HTMLParser
-import rython
 import re
 from datetime import datetime
 from collections import defaultdict
@@ -13,14 +12,14 @@ from collections import defaultdict
 def get_season(timestamp):
     date = datetime.fromtimestamp(timestamp)
 
-    if (date.month >= 3 and date.day >= 20 and
-        date.month < 6 and date.day < 21):
+    if ((date.month >= 3 and date.day >= 20) and
+        (date.month <= 6 and date.day <= 21)):
         season = "sum"
-    elif (date.month >= 6 and date.day >= 20 and
-        date.month < 9 and date.day < 21):
+    elif ((date.month >= 6 and date.day >= 20) and
+        (date.month <= 9 and date.day <= 21)):
         season = "fall"
-    elif (date.month >= 9 and date.date >= 20 and
-        date.month < 12 and date.day < 21):
+    elif ((date.month >= 9 and date.date >= 20) and
+        (date.month <= 12 and date.day <= 21)):
         season = "win"
     else:
         season = "spr"
@@ -69,7 +68,7 @@ def build_archive_corpus(codes=None):
         
     # set log path and iterate over logs, each file is a entry
     path = "/var/sep/usr/encyclopedia/logs"
-    archive_path = '/var/sep/usr/etc/httpd/htdocs/archives/{season}/entries/{entry}/'
+    archive_path = '/var/sep/usr/local/etc/httpd/htdocs/archives/{season}/entries/{entry}/'
     unique_articles = defaultdict(dict)
     for entry in os.listdir(path):
        # archives stores unique versions
@@ -89,6 +88,7 @@ def build_archive_corpus(codes=None):
     return unique_articles
 
 def getStyleBibliography(biblioList):
+    import rython
     ctx = rython.RubyContext(requires=["rubygems", "anystyle/parser"])
     ctx("Encoding.default_internal = 'UTF-8'")
     ctx("Encoding.default_external = 'UTF-8'")
