@@ -12,14 +12,20 @@ from collections import defaultdict
 def get_season(timestamp):
     date = datetime.fromtimestamp(timestamp)
 
-    if ((date.month >= 3 and date.day >= 20) and
-        (date.month <= 6 and date.day <= 21)):
+    if ((date.month == 3 and date.day >= 21)
+        or date.month == 4
+        or date.month ==5
+        or (date.month == 6 and date.day <= 20)):
         season = "sum"
-    elif ((date.month >= 6 and date.day >= 20) and
-        (date.month <= 9 and date.day <= 21)):
+    elif ((date.month == 6 and date.day >= 21)
+        or date.month == 7
+        or date.month == 8
+        or (date.month == 9 and date.day <= 20)):
         season = "fall"
-    elif ((date.month >= 9 and date.date >= 20) and
-        (date.month <= 12 and date.day <= 21)):
+    elif ((date.month == 9 and date.day >= 21)
+        or date.month == 10
+        or date.month == 11
+        or (date.month == 12 and date.day <= 20)):
         season = "win"
     else:
         season = "spr"
@@ -64,7 +70,7 @@ def build_archive_corpus(codes=None):
     """
     # set default codes
     if codes is None:
-        codes = ["eP100", "eP101", "ep101", "eR101"]
+        codes = ["eP001", "ep001", "eP100", "eP101", "ep101", "eR101"]
         
     # set log path and iterate over logs, each file is a entry
     path = "/var/sep/usr/encyclopedia/logs"

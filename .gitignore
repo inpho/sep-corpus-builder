@@ -1,2 +1,7 @@
 *.pyc
 *.pyo
+
+data
+data_*
+
+sep_corpus.log
