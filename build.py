@@ -30,6 +30,7 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('quarter', help='Quarter identifier (e.g., fall2016)')
+    parser.add_argument('-o', '--output', help='Output directory', default=None)
     args = parser.parse_args()
 
-    copy_archive(args.quarter)
+    copy_archive(args.quarter, output=args.output)
