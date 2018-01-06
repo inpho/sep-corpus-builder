@@ -21,7 +21,9 @@ def copy_archive(quarter, output_path=None):
         os.makedirs(output_path)
 
     for entry in archive_at_season(quarter, versions):
-        shutil.copyfile('data/'+ entry, output_path + entry.split('-',1)[1])
+        outfile = output_path + entry.split('-',1)[1]
+        outfile = outfile.replace('.txt', '')
+        shutil.copyfile('data/'+ entry, outfile)
  
 
 if __name__ == '__main__':
