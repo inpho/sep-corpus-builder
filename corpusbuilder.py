@@ -77,7 +77,7 @@ def build_archive_corpus(codes=None):
     archive_path = '/var/sep/usr/local/etc/httpd/htdocs/archives/{season}/entries/{entry}/'
     unique_articles = defaultdict(dict)
     for entry in os.listdir(path):
-       # archives stores unique versions
+        # archives stores unique versions
         versions = set()
         with open(path+'/'+entry, 'r') as f:
             for line_num, line in enumerate(f):
@@ -107,19 +107,19 @@ def getStyleBibliography(biblioList):
     return anyStyleList	
 
 def extract_bibliography(filename):
-	f = open(filename)
-        doc = f.read()
-        soup = BeautifulSoup(doc, convertEntities=["xml", "html"])
-        bibliography = soup.findAll('ul',{"class":"hanging"})
-        bib =[]
-        if bibliography:
-                for ul in bibliography:
-                        for li in ul.findAll('li'):
-                                bib.append(li.text)
-        else:
-            logging.warning("No bibliography found")
+    f = open(filename)
+    doc = f.read()
+    soup = BeautifulSoup(doc, convertEntities=["xml", "html"])
+    bibliography = soup.findAll('ul',{"class":"hanging"})
+    bib =[]
+    if bibliography:
+        for ul in bibliography:
+            for li in ul.findAll('li'):
+                bib.append(li.text)
+    else:
+        logging.warning("No bibliography found")
 
-        return bib
+    return bib
 
 def get_titles():
     """
@@ -183,8 +183,8 @@ def extract_article_body(entry, filename):
           logging.error('Could not extract text from %s' % filename)
           return ''
     except:
-      logging.error('File at path %s does not exist.' % filename)
-      return ''
+        logging.error('File at path %s does not exist.' % filename)
+        return ''
 
 
 if __name__ == '__main__':

@@ -23,18 +23,21 @@ def copy_archive(quarter, output_path=None):
         os.makedirs(output_path)
 
     for entry in archive_at_season(quarter, versions):
-        shutil.copyfile('data/'+ entry, output_path + entry.split('-',1)[1])
+        outfile = output_path + entry.split('-',1)[1]
+        outfile = outfile.replace('.txt', '')
+        shutil.copyfile('data/'+ entry, outfile)
  
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('quarter', help='Quarter identifier (e.g., fall2016)', default=None)
+    parser.add_argument('-o', '--output', help='Output directory', default=None)
     args = parser.parse_args()
-
+    
     if args.quarter is None:
         # Default to the previous quarter
         SECONDS_IN_MONTH = 60 * 60 * 24 * 90
         args.quarter = get_season(time.time() - SECONDS_IN_MONTH)
 
-    copy_archive(args.quarter)
+    copy_archive(args.quarter, output=args.output)
