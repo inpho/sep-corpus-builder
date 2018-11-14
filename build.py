@@ -1,7 +1,9 @@
 import os
 import os.path
 import shutil
+import time
 
+from corpusbuilder import get_season
 from recent_archives import *
 
 #get the archive
@@ -27,7 +29,12 @@ def copy_archive(quarter, output_path=None):
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    parser.add_argument('quarter', help='Quarter identifier (e.g., fall2016)')
+    parser.add_argument('quarter', help='Quarter identifier (e.g., fall2016)', default=None)
     args = parser.parse_args()
+
+    if args.quarter is None:
+        # Default to the previous quarter
+        SECONDS_IN_MONTH = 60 * 60 * 24 * 90
+        args.quarter = get_season(time.time() - SECONDS_IN_MONTH)
 
     copy_archive(args.quarter)
